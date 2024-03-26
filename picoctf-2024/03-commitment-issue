@@ -1,0 +1,5 @@
+unzip challenge.zip && cd drop-in
+git log
+git diff master~1..master | grep pico
+picoCTF{s@n1t1z3_7246792d}
+

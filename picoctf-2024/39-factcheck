@@ -1,0 +1,105 @@
+$ curl -sO https://artifacts.picoctf.net/c_titan/188/bin
+$ chmod +x bin
+
+# Running the binary doesn't do anything
+
+---
+
+Decompiling the binary using cutter:
+
+$ cutter bin
+
+Showing below are the relevant parts of the decompiled code:
+
+```
+// Copy the picoctf partial flag @ address of var_249h + 1: this help to track which location we need to watch
+method.std::__cxx11::basic_string_char__std::char_traits_char___std::allocator_char___.basic_string_char_const___std::allocator_char__const
+          ((int64_t)&var_249h + 1, "picoCTF{wELF_d0N3_mate_", &var_249h);
+
+// This is at the end of the code.
+// This line copies 0x7d -> '}' in ascii. 
+// I guessed that whole falg will be copied till this point.
+
+method.std::__cxx11::basic_string_char__std::char_traits_char___std::allocator_char___.operator___char
+          ((int64_t)&var_249h + 1, 0x7d);
+```
+
+
+------
+
+I ran the code in gdb and adding breakpoint at location where the value 0x7d is copied to the memory location.
+Once there, printing the var_249h location printed the whole flag.
+
+> picoCTF{wELF_d0N3_mate_1c496e73}
+
+---
+
+Here is some commands in gdb :
+
+$ x/15i main
+>    0x555555555289 <main>:	endbr64 
+>    0x55555555528d <main+4>:	push   rbp
+>    0x55555555528e <main+5>:	mov    rbp,rsp
+> => 0x555555555291 <main+8>:	push   rbx
+>    0x555555555292 <main+9>:	sub    rsp,0x248
+>    0x555555555299 <main+16>:	mov    rax,QWORD PTR fs:0x28
+>    0x5555555552a2 <main+25>:	mov    QWORD PTR [rbp-0x18],rax
+>    0x5555555552a6 <main+29>:	xor    eax,eax
+>    0x5555555552a8 <main+31>:	lea    rax,[rbp-0x241]
+>    0x5555555552af <main+38>:	mov    rdi,rax
+>    0x5555555552b2 <main+41>:	call   0x555555555180 <_ZNSaIcEC1Ev@plt>
+>    0x5555555552b7 <main+46>:	lea    rdx,[rbp-0x241]
+>    0x5555555552be <main+53>:	lea    rax,[rbp-0x240]        # address at which the string will be copied
+>    0x5555555552c5 <main+60>:	lea    rsi,[rip+0xd39]        # 0x555555556005 -> location of string "picoCTF{..." in data segment
+>    0x5555555552cc <main+67>:	mov    rdi,rax
+
+
+$ info reg
+> rax            0x7fffffffe150      140737488347472
+> rbx            0xffffffce          4294967246
+> rcx            0x0                 0
+> rdx            0x2e                46
+> rsi            0x7d                125
+> rdi            0x7fffffffe150      140737488347472
+> rbp            0x7fffffffe390      0x7fffffffe390
+> rsp            0x7fffffffe140      0x7fffffffe140
+> r8             0x1                 1
+> r9             0x55555556aed0      93824992325328
+> r10            0x7ffff7b4c4d0      140737349207248
+> r11            0x20b9ff57d0957b92  2358196632531860370
+> r12            0x7fffffffe4a8      140737488348328
+> r13            0x555555555289      93824992236169
+> r14            0x0                 0
+> r15            0x7ffff7ffd040      140737354125376
+> rip            0x555555555860      0x555555555860 <main+1495>
+> eflags         0x206               [ PF IF ]
+> cs             0x33                51
+> ss             0x2b                43
+> ds             0x0                 0
+> es             0x0                 0
+> fs             0x0                 0
+> gs             0x0                 0
+
+rbp = 0x7fffffffe390
+
+
+$ x/20xg 0x7fffffffe390-0x250
+> 0x7fffffffe140:	0x0000000000000000	0x0000ffff00000000
+> 0x7fffffffe150:	0x000055555556aed0	0x0000000000000020
+> 0x7fffffffe160:	0x000000000000002e	0x00007ffff7d591b8
+> 0x7fffffffe170:	0x00007fffffffe180	0x0000000000000001
+> 0x7fffffffe180:	0x00007ffff7ff0037	0x00007ffff7fd5f71
+> 0x7fffffffe190:	0x00007fffffffe1a0	0x0000000000000001
+> 0x7fffffffe1a0:	0x00007ffff7fc0035	0x00007ffff7fde660
+> 0x7fffffffe1b0:	0x00007fffffffe1c0	0x0000000000000001
+> 0x7fffffffe1c0:	0x0000000000000034	0x00007fffffffe4a8
+> 0x7fffffffe1d0:	0x00007fffffffe1e0	0x0000000000000001
+
+
+---
+
+I checked most of the addresses in the above results:
+This address: 0x000055555556aed0, printed the complete flag
+
+$ x/s 0x000055555556aed0
+> 0x55555556aed0:	"picoCTF{wELF_d0N3_mate_1c496e73}"

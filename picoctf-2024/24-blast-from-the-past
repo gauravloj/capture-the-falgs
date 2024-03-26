@@ -1,0 +1,186 @@
+curl -sO https://artifacts.picoctf.net/c_mimas/74/original.jpg
+
+$ exiftool original.jpg
+
+exiftool -TimeStamp="1970:01:01 00:00:00.001+00:00" original.jpg
+exiftool -ModifyDate="1970:01:01 00:00:00.001+00:00" original.jpg
+exiftool -CreateDate="1970:01:01 00:00:00.001+00:00" original.jpg
+exiftool -DateTimeOriginal="1970:01:01 00:00:00.001+00:00" original.jpg
+
+$ nc -w 2 mimas.picoctf.net 63072 <  modified.jpg
+$ nc -d mimas.picoctf.net 58220
+
+```
+MD5 of your picture:
+e7537a20fd614f08232eaa16d4f6587a  test.out
+
+Checking tag 1/7
+Looking at IFD0: ModifyDate
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 2/7
+Looking at ExifIFD: DateTimeOriginal
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 3/7
+Looking at ExifIFD: CreateDate
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 4/7
+Looking at Composite: SubSecCreateDate
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.703
+Oops! That tag isn't right. Please try again.
+```
+
+--------
+
+hexedit original.jpg
+
+> searched for 703 in the header, and edited all the instance of 703 to 001 (ascii)
+
+```
+MD5 of your picture:
+eb5ae92ce9f801b9d1aa8e4c800e9705  test.out
+
+Checking tag 1/7
+Looking at IFD0: ModifyDate
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 2/7
+Looking at ExifIFD: DateTimeOriginal
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 3/7
+Looking at ExifIFD: CreateDate
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 4/7
+Looking at Composite: SubSecCreateDate
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.001
+Great job, you got that one!
+
+Checking tag 5/7
+Looking at Composite: SubSecDateTimeOriginal
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.001
+Great job, you got that one!
+
+Checking tag 6/7
+Looking at Composite: SubSecModifyDate
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.001
+Great job, you got that one!
+
+Checking tag 7/7
+Timezones do not have to match, as long as it's the equivalent time.
+Looking at Samsung: TimeStamp
+Looking for '1970:01:01 00:00:00.001+00:00'
+Found: 2023:11:20 20:46:21.420+00:00
+Oops! That tag isn't right. Please try again.
+```
+
+Downloaded exiftool github: https://github.com/exiftool/exiftool
+
+Searched for 'Time Stamp' and 'Samsung' : `rg -i 'time*stamp' | grep -i 'samsung'`
+
+Found two useful files: 'lib/Image/ExifTool/Samsung.pm', html/TagNames/Samsung.html
+
+1st file shows the metadata information of Samsung image: 
+
+Useful information :
+```
+# Shows that the metadata is in the trailing part of the image
+%Image::ExifTool::Samsung::Trailer = (
+
+
+# Belowinformation helped in identifying the exact byte to edit using hexedit.
+# Keyword found in the ascii content: `Image_UTC_Data` and `MCC_Data`
+
+   # 0x0a01-name - seen 'Image_UTC_Data'
+    '0x0a01' => { #forum7161
+        Name => 'TimeStamp',
+        Groups => { 2 => 'Time' },
+        ValueConv => 'ConvertUnixTime($val / 1e3, 1, 3)',
+        PrintConv => '$self->ConvertDateTime($val)',
+    },
+    '0x0a20-name' => 'DualCameraImageName', # ("FlipPhoto_002")
+    '0x0a20' => { Name => 'DualCameraImage', Groups => { 2 => 'Preview' }, Binary => 1 },
+    '0x0a30-name' => 'EmbeddedVideoType', # ("MotionPhoto_Data")
+    '0x0a30' => { Name => 'EmbeddedVideoFile', Groups => { 2 => 'Video' }, Binary => 1 }, #forum7161
+   # 0x0aa1-name - seen 'MCC_Data'
+   # 0x0aa1 - seen '204','222','234','302','429'
+    '0x0aa1' => {
+        Name => 'MCCData',
+        Groups => { 2 => 'Location' },
+        PrintConv => {
+
+
+set the `Image_UTC_Data1700513181420` in the hexeditor image trailer to `Image_UTC_Data0000000000001`
+
+It worked after above upload:
+
+```
+MD5 of your picture:
+53fb0c20810e3eb237e9854c0e6e92a2  test.out
+
+Checking tag 1/7
+Looking at IFD0: ModifyDate
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 2/7
+Looking at ExifIFD: DateTimeOriginal
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 3/7
+Looking at ExifIFD: CreateDate
+Looking for '1970:01:01 00:00:00'
+Found: 1970:01:01 00:00:00
+Great job, you got that one!
+
+Checking tag 4/7
+Looking at Composite: SubSecCreateDate
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.001
+Great job, you got that one!
+
+Checking tag 5/7
+Looking at Composite: SubSecDateTimeOriginal
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.001
+Great job, you got that one!
+
+Checking tag 6/7
+Looking at Composite: SubSecModifyDate
+Looking for '1970:01:01 00:00:00.001'
+Found: 1970:01:01 00:00:00.001
+Great job, you got that one!
+
+Checking tag 7/7
+Timezones do not have to match, as long as it's the equivalent time.
+Looking at Samsung: TimeStamp
+Looking for '1970:01:01 00:00:00.001+00:00'
+Found: 1970:01:01 00:00:00.001+00:00
+Great job, you got that one!
+
+You did it!
+picoCTF{71m3_7r4v311ng_p1c7ur3_b5f7bcb5}
+```
+

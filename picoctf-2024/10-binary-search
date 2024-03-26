@@ -1,0 +1,33 @@
+after launching the instance:
+
+ssh -p 49938 ctf-player@atlas.picoctf.net
+
+binary search with half of the allowed range: 
+
+Welcome to the Binary Search Game!
+I'm thinking of a number between 1 and 1000.
+Enter your guess: 500
+Lower! Try again.
+Enter your guess: 250
+Lower! Try again.
+Enter your guess: 125
+Lower! Try again.
+Enter your guess: 63
+Lower! Try again.
+Enter your guess: 33
+Higher! Try again.
+Enter your guess: 48
+Lower! Try again.
+Enter your guess: 40
+Higher! Try again.
+Enter your guess: 44
+Higher! Try again.
+Enter your guess: 46
+Lower! Try again.
+Enter your guess: 45
+Congratulations! You guessed the correct number: 45
+Here's your flag: picoCTF{g00d_gu355_3af33d18}
+
+Flag:
+picoCTF{g00d_gu355_3af33d18}
+

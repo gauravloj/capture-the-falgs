@@ -1,0 +1,7 @@
+curl -O https://artifacts.picoctf.net/c_atlas/2/challenge.zip
+unzip challenge.zip
+open home/ctf-player/drop-in/flag.png
+
+scane the QR code:
+picoCTF{p33k_@_b00_b5ce2572}
+

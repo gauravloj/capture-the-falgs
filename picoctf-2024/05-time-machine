@@ -1,0 +1,4 @@
+unzip challenge.zip && cd drop-in/
+git log | grep pico
+picoCTF{t1m3m@ch1n3_5cde9075}
+

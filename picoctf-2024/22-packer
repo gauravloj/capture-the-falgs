@@ -1,0 +1,41 @@
+
+$ curl -sO https://artifacts.picoctf.net/c_titan/21/out
+
+$ strings out
+> # Found this line: 
+> $Info: This file is packed with the UPX executable packer http://upx.sf.net $
+> $Id: UPX 3.95 Copyright (C) 1996-2018 the UPX Team. All Rights Reserved. $
+
+Searched about upx: it is used for packing executable file. 
+It can be unpacked by running `upx -d <packed-binaryfile>`
+
+---
+$ upx -d out -o out_unpacked
+>  Ultimate Packer for eXecutables
+>                           Copyright (C) 1996 - 2020
+> UPX 3.96        Markus Oberhumer, Laszlo Molnar & John Reiser   Jan 23rd 2020
+> 
+>         File size         Ratio      Format      Name
+>    --------------------   ------   -----------   -----------
+>     872088 <-    336520   38.59%   linux/amd64   out
+> 
+> Unpacked 1 file.
+
+above command has unpacked the binary in place. Hence, unpacked binary is now replaced with packed binary.
+
+-> running the binary asks for a password. Hence, running strings command again on unpacked binary. 
+$ strings out_unpacked > strings-output.txt
+
+-> Searched if we can find 'password' somewhere, fortunately, found this line: 
+> Enter the password to unlock this file: 
+> You entered: %s
+> Password correct, please see flag: 7069636f4354467b5539585f556e5034636b314e365f42316e34526933535f33373161613966667d
+> Access denied
+
+-> 
+above string seems like a hex coded string. 
+
+# note, on macos, echo adds newline at the end, use '-n' flag to avoid that.
+ $ echo '7069636f4354467b5539585f556e5034636b314e365f42316e34526933535f33373161613966667d' | xxd -r -p
+ picoCTF{U9X_UnP4ck1N6_B1n4Ri3S_371aa9ff}
+

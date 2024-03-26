@@ -1,0 +1,5 @@
+prettify the html response from http://titan.picoctf.net:53048/
+curl http://titan.picoctf.net:53048/ > unminify.html
+tidy -i unminify.html 2> /dev/null | sed -n '/picoCTF{/p' | grep -o '".*"' | tr -d '"'
+
+

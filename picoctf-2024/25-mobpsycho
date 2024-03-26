@@ -1,0 +1,14 @@
+$ curl -sO https://artifacts.picoctf.net/c_titan/52/mobpsycho.apk
+
+$ unzip mobpsycho.apk
+
+$ find . -type f -iname '*.txt'
+> ./res/color/flag.txt
+
+
+$ cat ./res/color/flag.txt
+> 7069636f4354467b6178386d433052553676655f4e5838356c346178386d436c5f38356462643231357d
+
+$ cat ./res/color/flag.txt | xxd -r -p
+picoCTF{ax8mC0RU6ve_NX85l4ax8mCl_85dbd215}                                                                                                                                                                                                      
+

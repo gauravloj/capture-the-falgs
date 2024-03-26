@@ -1,0 +1,15 @@
+curl -sO https://artifacts.picoctf.net/c_rhea/11/challenge.zip
+unzip challenge.zip && cd home/ctf-player/drop-in
+
+cat checksum.txt 
+5848768e56185707f76c1d74f34f4e03fb0573ecc1ca7b11238007226654bcda
+
+for file in ./files/* ; do sha256sum $file; done 2> /dev/null | grep 5848
+5848768e56185707f76c1d74f34f4e03fb0573ecc1ca7b11238007226654bcda  ./files/8eee7195
+
+
+ssh -p 60115 ctf-player@rhea.picoctf.net
+
+./decrypt.sh ./files/8eee7195
+picoCTF{trust_but_verify_8eee7195}
+

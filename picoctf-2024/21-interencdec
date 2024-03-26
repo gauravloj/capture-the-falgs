@@ -1,0 +1,14 @@
+curl -sO https://artifacts.picoctf.net/c_titan/2/enc_flag
+
+cat enc_flag 
+> YidkM0JxZGtwQlRYdHFhR3g2YUhsZmF6TnFlVGwzWVROclh6YzRNalV3YUcxcWZRPT0nCg==
+
+cat enc_flag | base64 -d
+> b'd3BqdkpBTXtqaGx6aHlfazNqeTl3YTNrXzc4MjUwaG1qfQ=='
+
+cat enc_flag | base64 -d | awk -F "'" '{print $2}' | base64 -d
+> wpjvJAM{jhlzhy_k3jy9wa3k_78250hmj}
+
+cat enc_flag | base64 -d | awk -F "'" '{print $2}' | base64 -d | tr 'a-zA-Z' 't-za-sT-ZA-S'
+> picoCTF{caesar_d3cr9pt3d_78250afc}
+

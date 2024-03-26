@@ -1,0 +1,4 @@
+curl -O https://artifacts.picoctf.net/c_titan/73/challenge.zip
+unzip challenge.zip && cd drop-in
+git blame message.py | cut -d' ' -f2 | tr -d '('
+

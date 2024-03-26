@@ -1,0 +1,90 @@
+# Cipher text
+$ curl -sO https://artifacts.picoctf.net/c_titan/33/secret.enc
+
+# password
+$ curl -sO https://artifacts.picoctf.net/c_titan/33/password.enc
+
+Encryption server: nc titan.picoctf.net 52816
+
+---
+
+Goal:
+decrypt password using the given encryption server and use that password 
+to decrypt the message.
+
+---
+
+Notations:
+plain_n = plain text,  'n' is for distinction
+ci_n = cipher text for the corresponding plain text
+
+---
+Strategy:
+1. encrypt 'custom' plain text 
+2. multiply encrypted password and encrypted custom text
+3. Decrypt the result of above multiplication
+4. divide the result by custom plain text
+5. Decode the result to get the password
+
+---
+
+1. Encrypt custom plain text
+
+-> Let random_text = "ABCD"
+
+> what should we do for you? 
+> E --> encrypt D --> decrypt. 
+> e
+> enter text to encrypt (encoded length must be less than keysize): ABCD
+> ABCD
+> 
+> encoded cleartext as Hex m: 41424344
+> 
+> ciphertext (m ^ e mod n) 2548221900176025821207690783304289874219329573442782738347340462083400346224814059485488900616525338491201159681429424480853034886201785474291289602722043
+
+
+2. Multiply encrypted password and encrypted custom text
+
+enc_custom_text = 2548221900176025821207690783304289874219329573442782738347340462083400346224814059485488900616525338491201159681429424480853034886201785474291289602722043
+enc_pass = 1634668422544022562287275254811184478161245548888973650857381112077711852144181630709254123963471597994127621183174673720047559236204808750789430675058597
+
+enc_pass * enc_custom_text = 4165497873852875858795140940928037863389021568083971706992881964010897076684668407519706060939310400874417150691313545629051369339468756967642173990922922577884721590717595422199035301331349875217819613715477859957674362029632148850839319077009068339787695820718277574845289023262380145410640939719728553671
+
+
+3. Decrypt the result of above multiplication:
+
+> E --> encrypt D --> decrypt. 
+> d
+> Enter text to decrypt: 4165497873852875858795140940928037863389021568083971706992881964010897076684668407519706060939310400874417150691313545629051369339468756967642173990922922577884721590717595422199035301331349875217819613715477859957674362029632148850839319077009068339787695820718277574845289023262380145410640939719728553671
+> decrypted ciphertext as hex (c ^ d mod n): d500afb1e88259dd4
+
+4. Divide the decrypted number by plain text
+
+dec_result = 0xd500afb1e88259dd4
+custom_plain = 0x41424344 # hex of 'ABCD'
+
+pass_plain = dec_result / custom_plain
+
+# prints pass_plain = 224298087781.0
+
+5. Decode the plain password result
+pass_plain = 224298087781
+pass_plain_hex = hex(pass_plain)
+# prints '0x3439353565'
+
+$ echo '3439353565' | xxd -r -p
+> 4955e
+
+---
+
+Hence the password is '4955e'
+
+---
+
+Decrypting the message:
+$ openssl enc -aes-256-cbc -d -in secret.enc
+# enter the password '4955e'
+> enter AES-256-CBC decryption password:
+> *** WARNING : deprecated key derivation used.
+> Using -iter or -pbkdf2 would be better.
+> picoCTF{su((3ss_(r@ck1ng_r3@_4955eb5d}%

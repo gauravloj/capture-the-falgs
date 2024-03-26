@@ -1,0 +1,7 @@
+curl -O https://artifacts.picoctf.net/c_titan/70/challenge.zip
+unzip challenge.zip && cd drop-in
+git branch # shows 3 feature branches
+for branch in $(git branch); do [[ $branch =~ 'feature' ]] && { git checkout $branch && python3 flag.py && echo ""; }; done 2> /dev/null | grep -v Printing | tr -d '\n'
+picoCTF{t3@mw0rk_m@k3s_th3_dr3@m_w0rk_7ffa0077}
+ 
+
